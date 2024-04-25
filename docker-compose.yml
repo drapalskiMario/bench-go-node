@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bench
+    ports:
+      - "3306:3306"
+    volumes:
+        - ./init.sql:/data/application/init.sql
+    command: --default-authentication-plugin=mysql_native_password  --init-file /data/application/init.sql
+    networks:
+      - mynetwork
+  
+  go:
+    build: ./golang
+    mem_limit: 512m
+    cpus: 0.5
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+    
+  node:
+    build: ./nodejs
+    mem_limit: 512m
+    cpus: 0.5
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+    
+networks:
+  mynetwork:
+
